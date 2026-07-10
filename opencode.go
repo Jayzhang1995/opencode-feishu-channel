@@ -18,7 +18,7 @@ type OpencodeClient struct {
 }
 
 type OpenCodeSendRequest struct {
-	SessionID string `json:"sessionId"`
+	SessionID string `json:"id"`
 	Message   string `json:"message"`
 }
 
@@ -31,7 +31,7 @@ type OpenCodeSendResponse struct {
 }
 
 type OpenCodeSessionResponse struct {
-	SessionID string `json:"sessionId"`
+	SessionID string `json:"id"`
 	Messages  []struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
@@ -68,7 +68,7 @@ func (c *OpencodeClient) CreateSession(ctx context.Context) (string, error) {
 	defer resp.Body.Close()
 
 	var sr struct {
-		SessionID string `json:"sessionId"`
+		SessionID string `json:"id"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&sr); err != nil {
 		return "", fmt.Errorf("create session parse: %w", err)

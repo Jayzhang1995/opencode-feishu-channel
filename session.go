@@ -44,19 +44,39 @@ func (sm *SessionManager) load() {
 	if err != nil {
 		return
 	}
+	// Try new format first (array-based)
 	var db sessionDB
-	if err := json.Unmarshal(data, &db); err != nil {
-		logf("Failed to parse sessions: %v", err)
+	if err := json.Unmarshal(data, &db); err == nil && len(db.Sessions) > 0 {
+		for _, s := range db.Sessions {
+			sm.sessions[s.Key] = &sessionInfo{
+				SessionID: s.SessionID,
+				Key:       s.Key,
+				CreatedAt: s.CreatedAt,
+			}
+		}
+		logf("Loaded %d sessions from disk", len(db.Sessions))
 		return
 	}
-	for _, s := range db.Sessions {
-		sm.sessions[s.Key] = &sessionInfo{
-			SessionID: s.SessionID,
-			Key:       s.Key,
-			CreatedAt: s.CreatedAt,
-		}
+	// Fallback: old map format {"key": {"sessionId": "...", "createdAt": ...}}
+	var oldMap map[string]struct {
+		SessionID string `json:"sessionId"`
+		CreatedAt int64  `json:"createdAt"`
+		LastUsedAt int64 `json:"lastUsedAt"`
 	}
-	logf("Loaded %d sessions from disk", len(db.Sessions))
+	if err := json.Unmarshal(data, &oldMap); err == nil {
+		count := 0
+		for k, v := range oldMap {
+			sm.sessions[k] = &sessionInfo{
+				SessionID: v.SessionID,
+				Key:       k,
+				CreatedAt: v.CreatedAt,
+			}
+			count++
+		}
+		logf("Loaded %d sessions from disk (old format)", count)
+		return
+	}
+	logf("Failed to parse sessions: %v", err)
 }
 
 func (sm *SessionManager) save() {
