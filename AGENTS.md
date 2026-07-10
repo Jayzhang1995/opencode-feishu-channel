@@ -4,6 +4,16 @@
 
 opencode AI ↔ 飞书即时通讯桥梁。Go 编写，官方飞书 SDK + WebSocket 长连接。
 
+## 飞书群命令
+
+| 命令 | 说明 |
+|------|------|
+| `/session` / `/status` | 查看当前会话 |
+| `/sessions` / `/list` | 列出所有会话 |
+| `/stop` / `/cancel` | 取消正在执行的 AI 请求 |
+| `/clear` / `/new` / `/reset` | 清除当前会话 |
+| `/help` | 显示帮助 |
+
 ## 关键文件
 
 | 文件 | 用途 |

@@ -14,6 +14,18 @@ Receives Feishu group chat / direct messages via WebSocket, forwards them to ope
 - Session persistence — conversation sessions survive restarts
 - Low resource usage — ~8MB RSS
 
+## Feishu Commands
+
+Type these in any Feishu group chat connected to the bot:
+
+| Command | Description |
+|---------|-------------|
+| `/session` or `/status` | Show current session ID |
+| `/sessions` or `/list` | List all active sessions on the server |
+| `/stop` or `/cancel` | Cancel the current in-flight AI request |
+| `/clear` or `/new` or `/reset` | Clear current session and start fresh |
+| `/help` | Show command help |
+
 ## Prerequisites
 
 - Go 1.26+
