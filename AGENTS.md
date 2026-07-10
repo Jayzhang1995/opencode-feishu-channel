@@ -42,18 +42,18 @@ sudo cp config.json /etc/opencode-feishu-channel/
 ./opencode-feishu-channel --config /etc/opencode-feishu-channel/config.json
 
 # systemd
-systemctl --user start opencode-opencode-feishu-channel
-systemctl --user stop opencode-opencode-feishu-channel
-systemctl --user restart opencode-opencode-feishu-channel
-systemctl --user status opencode-opencode-feishu-channel
+systemctl --user start opencode-feishu-channel
+systemctl --user stop opencode-feishu-channel
+systemctl --user restart opencode-feishu-channel
+systemctl --user status opencode-feishu-channel
 ```
 
 ## 日志
 
 ```bash
-tail -f /var/log/opencode-opencode-feishu-channel.log
+tail -f /var/log/opencode-feishu-channel.log
 # 或 systemd journal
-journalctl --user -u opencode-opencode-feishu-channel -n 50 --no-pager
+journalctl --user -u opencode-feishu-channel -n 50 --no-pager
 ```
 
 ## 信号处理
@@ -64,7 +64,7 @@ journalctl --user -u opencode-opencode-feishu-channel -n 50 --no-pager
 
 ## MCP 管理工具
 
-`/root/.opencode/mcp-opencode-feishu-channel.js` 提供 4 个操作：
+`/root/.opencode/mcp-feishu-channel.js` 提供 4 个操作：
 - `feishu_channel_status` — 查看状态
 - `feishu_channel_restart` — 两阶段重启（SIGUSR1 → 等待 → systemctl start）
 - `feishu_channel_logs` — 查看日志
@@ -72,7 +72,7 @@ journalctl --user -u opencode-opencode-feishu-channel -n 50 --no-pager
 
 ## 频道配置
 
-`/etc/opencode-opencode-feishu-channel/config.json` 中 `channels` 段：
+`/etc/opencode-feishu-channel/config.json` 中 `channels` 段：
 - key: 飞书群 Chat ID
 - value: `{ name, project }`
 

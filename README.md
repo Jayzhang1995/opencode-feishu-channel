@@ -14,6 +14,22 @@ Receives Feishu group chat / direct messages via WebSocket, forwards them to ope
 - Session persistence — conversation sessions survive restarts
 - Low resource usage — ~8MB RSS
 
+## Image OCR
+
+Simply **send an image** in any connected Feishu group chat — no special command needed. The service will:
+
+1. Download the image via Feishu API
+2. Run `tesseract` for Chinese + English OCR
+3. Forward the recognized text to the AI for processing
+
+Sample log output:
+```
+MSG openId=xxx type=group: (recognized text from image)
+```
+
+> Requires `tesseract-ocr` with `chi_sim` and `eng` language packs installed.
+> Supported format: PNG (Feishu default).
+
 ## Feishu Commands
 
 Type these in any Feishu group chat connected to the bot:
