@@ -17,11 +17,6 @@ type OpencodeClient struct {
 	httpClient     *http.Client
 }
 
-type OpenCodeSendRequest struct {
-	SessionID string `json:"id"`
-	Message   string `json:"message"`
-}
-
 type OpenCodeSendResponse struct {
 	Parts []struct {
 		Type string `json:"type"`
@@ -80,11 +75,12 @@ func (c *OpencodeClient) CreateSession(ctx context.Context) (string, error) {
 }
 
 func (c *OpencodeClient) SendMessage(ctx context.Context, sid, msg string) (*OpenCodeSendResponse, error) {
-	reqBody := OpenCodeSendRequest{
-		SessionID: sid,
-		Message:   msg,
+	bodyMap := map[string]interface{}{
+		"parts": []map[string]string{
+			{"type": "text", "text": msg},
+		},
 	}
-	b, _ := json.Marshal(reqBody)
+	b, _ := json.Marshal(bodyMap)
 	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/session/"+sid+"/message", bytes.NewReader(b))
 	if err != nil {
 		return nil, fmt.Errorf("send message: %w", err)
