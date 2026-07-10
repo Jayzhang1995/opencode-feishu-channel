@@ -1,4 +1,4 @@
-# feishu-channel
+# opencode-feishu-channel
 
 Bridge between [opencode](https://opencode.ai) AI and [Feishu](https://www.feishu.cn) (Lark) instant messaging.
 
@@ -40,16 +40,16 @@ Type these in any Feishu group chat connected to the bot:
 
 ```bash
 # Build
-git clone <your-repo> feishu-channel
-cd feishu-channel
-go build -o feishu-channel .
+git clone <your-repo> opencode-feishu-channel
+cd opencode-feishu-channel
+go build -o opencode-feishu-channel .
 
 # Create config
 cp config.example.json config.json
 # Edit config.json with your Feishu app credentials
 
 # Run
-./feishu-channel --config config.json
+./opencode-feishu-channel --config config.json
 ```
 
 ## Configuration
@@ -105,7 +105,7 @@ After=network-online.target opencode-server.service
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/feishu-channel --config /etc/feishu-channel/config.json
+ExecStart=/usr/local/bin/opencode-feishu-channel --config /etc/opencode-feishu-channel/config.json
 Restart=always
 RestartSec=5
 KillMode=process

@@ -1,4 +1,4 @@
-# feishu-channel
+# opencode-feishu-channel
 
 [opencode](https://opencode.ai) AI 与[飞书](https://www.feishu.cn)即时通讯之间的桥梁。
 
@@ -40,16 +40,16 @@
 
 ```bash
 # 编译
-git clone <your-repo> feishu-channel
-cd feishu-channel
-go build -o feishu-channel .
+git clone <your-repo> opencode-feishu-channel
+cd opencode-feishu-channel
+go build -o opencode-feishu-channel .
 
 # 创建配置
 cp config.example.json config.json
 # 编辑 config.json 填入飞书应用凭据
 
 # 运行
-./feishu-channel --config config.json
+./opencode-feishu-channel --config config.json
 ```
 
 ## 配置说明
@@ -102,7 +102,7 @@ After=network-online.target opencode-server.service
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/feishu-channel --config /etc/feishu-channel/config.json
+ExecStart=/usr/local/bin/opencode-feishu-channel --config /etc/opencode-feishu-channel/config.json
 Restart=always
 RestartSec=5
 KillMode=process

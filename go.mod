@@ -1,4 +1,4 @@
-module github.com/anomalyco/feishu-channel
+module github.com/anomalyco/opencode-feishu-channel
 
 go 1.26
 
