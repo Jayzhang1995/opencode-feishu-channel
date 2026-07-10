@@ -1,5 +1,9 @@
 # opencode-feishu-channel
 
+<p align="right">
+  <a href="README.zh.md">中文</a>
+</p>
+
 Bridge between [opencode](https://opencode.ai) AI and [Feishu](https://www.feishu.cn) (Lark) instant messaging.
 
 Receives Feishu group chat / direct messages via WebSocket, forwards them to opencode for AI processing, and sends replies back to Feishu.

@@ -1,5 +1,9 @@
 # opencode-feishu-channel
 
+<p align="right">
+  <a href="README.md">English</a>
+</p>
+
 [opencode](https://opencode.ai) AI 与[飞书](https://www.feishu.cn)即时通讯之间的桥梁。
 
 通过 WebSocket 接收飞书群聊/私聊消息，转发至 opencode 进行 AI 处理，并将回复发回飞书。
