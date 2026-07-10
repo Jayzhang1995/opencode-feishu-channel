@@ -137,6 +137,29 @@ func (h *Handler) HandleEvent(ctx context.Context, event *larkim.P2MessageReceiv
 		}
 	}
 
+	if msgType == "post" {
+		imageKeys := extractImageKeysFromPost(safeStr(msg.Content))
+		if len(imageKeys) > 0 {
+			var ocrTexts []string
+			for _, key := range imageKeys {
+				buf, err := h.feishu.DownloadImage(ctx, msgID, key)
+				if err == nil {
+					t := ocrImage(buf)
+					if t != "" && !strings.HasPrefix(t, "(OCR") {
+						ocrTexts = append(ocrTexts, t)
+					}
+				}
+			}
+			if len(ocrTexts) > 0 {
+				if text != "" {
+					text += "\n"
+				}
+				text += strings.Join(ocrTexts, "\n")
+				logf("OCR from post: %s", truncate(strings.Join(ocrTexts, " | "), 80))
+			}
+		}
+	}
+
 	if text == "" && msgType != "image" {
 		return
 	}
@@ -338,6 +361,37 @@ func (h *Handler) WaitForInFlight() {
 
 func (h *Handler) Shutdown() {
 	h.shuttingDown = true
+}
+
+func extractImageKeysFromPost(content string) []string {
+	var post struct {
+		ZhCN json.RawMessage `json:"zh_cn"`
+	}
+	if err := json.Unmarshal([]byte(content), &post); err != nil {
+		return nil
+	}
+	raw := post.ZhCN
+	if raw == nil {
+		raw = json.RawMessage(content)
+	}
+	var parsed struct {
+		Content [][]struct {
+			Tag      string `json:"tag"`
+			ImageKey string `json:"image_key"`
+		} `json:"content"`
+	}
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return nil
+	}
+	var keys []string
+	for _, p := range parsed.Content {
+		for _, seg := range p {
+			if seg.Tag == "img" && seg.ImageKey != "" {
+				keys = append(keys, seg.ImageKey)
+			}
+		}
+	}
+	return keys
 }
 
 func parseMessageContent(msgType, content string) string {
