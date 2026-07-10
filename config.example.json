@@ -1,0 +1,30 @@
+{
+  "feishu": {
+    "appId": "cli_xxxxxxxxxxxxxxxx",
+    "appSecret": "your_app_secret_here"
+  },
+  "opencode": {
+    "url": "http://127.0.0.1:19999",
+    "modelProvider": "opencode",
+    "modelId": "deepseek-v4-flash-free"
+  },
+  "paths": {
+    "sessionDb": "/var/lib/feishu-channel/sessions.json",
+    "opencodeDb": "/var/lib/feishu-channel/opencode.db",
+    "financeFetcher": "",
+    "logFile": "/var/log/feishu-channel.log",
+    "pendingDb": "/var/lib/feishu-channel/pending.json"
+  },
+  "bridge": {
+    "requestTimeoutMs": 3600000,
+    "messageExpiryMs": 300000,
+    "processedCleanupIntervalMs": 60000,
+    "repliedCleanupIntervalMs": 600000
+  },
+  "channels": {
+    "oc_your_chat_group_id": {
+      "name": "助手名称",
+      "project": "/path/to/project"
+    }
+  }
+}
