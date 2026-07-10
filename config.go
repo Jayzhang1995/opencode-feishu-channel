@@ -29,7 +29,6 @@ type OpenCodeConfig struct {
 type PathsConfig struct {
 	SessionDb      string `json:"sessionDb"`
 	OpencodeDb     string `json:"opencodeDb"`
-	FinanceFetcher string `json:"financeFetcher"`
 	LogFile        string `json:"logFile"`
 	PendingDb      string `json:"pendingDb"`
 }
