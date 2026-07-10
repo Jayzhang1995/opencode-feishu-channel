@@ -127,6 +127,7 @@ func (h *Handler) HandleEvent(ctx context.Context, event *larkim.P2MessageReceiv
 		}
 		json.Unmarshal([]byte(safeStr(msg.Content)), &imgContent)
 		if imgContent.ImageKey != "" {
+			logf("  image_key: %s", imgContent.ImageKey)
 			buf, err := h.feishu.DownloadImage(ctx, msgID, imgContent.ImageKey)
 			if err == nil {
 				text = ocrImage(buf)
@@ -138,7 +139,9 @@ func (h *Handler) HandleEvent(ctx context.Context, event *larkim.P2MessageReceiv
 	}
 
 	if msgType == "post" {
+		logf("  post content length: %d bytes", len(safeStr(msg.Content)))
 		imageKeys := extractImageKeysFromPost(safeStr(msg.Content))
+		logf("  post image keys: %d", len(imageKeys))
 		if len(imageKeys) > 0 {
 			var ocrTexts []string
 			for _, key := range imageKeys {
@@ -164,7 +167,7 @@ func (h *Handler) HandleEvent(ctx context.Context, event *larkim.P2MessageReceiv
 		return
 	}
 
-	logf("MSG openId=%s chatId=%s type=%s: %s", openID, truncate(chatID, 20), chatType, truncate(text, 100))
+	logf("MSG openId=%s chatId=%s chatType=%s msgType=%s: %s", openID, truncate(chatID, 20), chatType, msgType, truncate(text, 100))
 
 	sendOnce := func(t string) {
 		h.repliedMu.Lock()
