@@ -150,7 +150,7 @@ func (sm *SessionManager) GetOrCreate(key, contextHint string) (string, error) {
 		sm.contexts[key] = customCtx
 	}
 
-	sid, err := sm.opencode.CreateSession(ctx)
+	sid, err := sm.opencode.CreateSession(ctx, contextHint)
 	if err != nil {
 		return "", fmt.Errorf("create session: %w", err)
 	}

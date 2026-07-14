@@ -20,3 +20,9 @@ func safeStr(s *string) string {
 	}
 	return *s
 }
+
+
+type MessageItem struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}

@@ -92,6 +92,7 @@ func recoverPendingDeliveries(feishu *FeishuClient, opencode *OpencodeClient, cf
 			for _, entry := range remaining {
 				done, err := processPendingEntry(ctx, feishu, opencode, &entry)
 				if err != nil {
+					logf("Recovery: error for msgId=%s: %v", entry.MsgID, err)
 					continue
 				}
 				if done {

@@ -91,9 +91,12 @@ func main() {
 	recoverPendingDeliveries(feishu, opencode, cfg)
 
 	ctx := context.Background()
-	if err := wsClient.Start(ctx); err != nil {
-		log.Fatalf("WS start failed: %v", err)
-	}
+	go func() {
+		if err := wsClient.Start(ctx); err != nil {
+			logf("WS client exited: %v", err)
+		}
+	}()
+
 	logf("WS connected, waiting for Feishu messages...")
 
 	sigCh := make(chan os.Signal, 3)
@@ -102,6 +105,7 @@ func main() {
 	sig := <-sigCh
 	logf("Received %v, shutting down...", sig)
 
+	wsClient.Close()
 	handler.Shutdown()
 
 	if sig == syscall.SIGUSR1 {

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -44,10 +45,13 @@ func NewOpencodeClient(baseURL, provider, modelID string, timeout time.Duration)
 	}
 }
 
-func (c *OpencodeClient) CreateSession(ctx context.Context) (string, error) {
+func (c *OpencodeClient) CreateSession(ctx context.Context, title string) (string, error) {
 	body := map[string]interface{}{
 		"modelProvider": c.modelProvider,
 		"modelId":       c.modelID,
+	}
+	if title != "" {
+		body["title"] = title
 	}
 	b, _ := json.Marshal(body)
 	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL+"/session", bytes.NewReader(b))
@@ -120,14 +124,13 @@ func (c *OpencodeClient) GetSession(ctx context.Context, sid string) (*OpenCodeS
 	return &sr, nil
 }
 
-func (c *OpencodeClient) GetSessionMessages(ctx context.Context, sid string) ([]struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}, error) {
+func (c *OpencodeClient) GetSessionMessages(ctx context.Context, sid string) ([]MessageItem, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", c.baseURL+"/session/"+sid+"/message", nil)
 	if err != nil {
 		return nil, fmt.Errorf("get messages: %w", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("get messages: %w", err)
@@ -135,12 +138,30 @@ func (c *OpencodeClient) GetSessionMessages(ctx context.Context, sid string) ([]
 	defer resp.Body.Close()
 
 	raw, _ := io.ReadAll(resp.Body)
-	var msgs []struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
+	var apiMsgs []struct {
+		Info struct {
+			Role string `json:"role"`
+		} `json:"info"`
+		Parts []struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		} `json:"parts"`
 	}
-	if err := json.Unmarshal(raw, &msgs); err != nil {
+	if err := json.Unmarshal(raw, &apiMsgs); err != nil {
 		return nil, fmt.Errorf("get messages parse: %w", err)
+	}
+	var msgs []MessageItem
+	for _, m := range apiMsgs {
+		var texts []string
+		for _, p := range m.Parts {
+			if p.Text != "" && (p.Type == "text" || p.Type == "reasoning") {
+				texts = append(texts, p.Text)
+			}
+		}
+		msgs = append(msgs, MessageItem{
+			Role:    m.Info.Role,
+			Content: strings.Join(texts, "\n"),
+		})
 	}
 	return msgs, nil
 }
