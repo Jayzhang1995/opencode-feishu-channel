@@ -20,6 +20,8 @@ import (
 
 var logFile *os.File
 
+var Version = "dev" // set via -ldflags -X main.Version=v1.0.0
+
 func logf(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	ts := time.Now().UTC().Add(8 * time.Hour).Format("2006-01-02 15:04:05")
@@ -30,9 +32,45 @@ func logf(format string, args ...interface{}) {
 	}
 }
 
+func printHelp() {
+	fmt.Println(`opencode-feishu-channel — AI bridge between Opencode and Feishu
+
+Usage:
+  opencode-feishu-channel [--config <path>] [--version] [--help]
+
+Options:
+  --config <path>   Path to config.json (default: ./config.json, or $CONFIG_PATH)
+  --version         Print version and exit
+  --help            Print this help and exit
+
+Feishu group commands:
+  /session, /status    Show current session
+  /sessions, /list     List all sessions
+  /stop, /cancel       Cancel running AI request
+  /clear, /new, /reset Clear current session
+  /help                Show help
+
+Signals:
+  SIGUSR1   Graceful drain (wait for all in-flight, no timeout)
+  SIGTERM   Graceful shutdown (wait up to requestTimeoutMs)
+`)
+}
+
 func main() {
 	configPath := flag.String("config", "", "path to config.json")
+	showVersion := flag.Bool("version", false, "print version and exit")
+	showHelp := flag.Bool("help", false, "print help and exit")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Println("opencode-feishu-channel version", Version)
+		return
+	}
+
+	if *showHelp {
+		printHelp()
+		return
+	}
 
 	if *configPath == "" {
 		*configPath = os.Getenv("CONFIG_PATH")
@@ -56,7 +94,7 @@ func main() {
 	}
 
 	logf("============================================================")
-	logf("Opencode Feishu Channel (Go)")
+	logf("Opencode Feishu Channel (Go)  version=%s", Version)
 	logf("============================================================")
 	logf("Config: %s", *configPath)
 	logf("OpenCode: %s", cfg.Opencode.URL)

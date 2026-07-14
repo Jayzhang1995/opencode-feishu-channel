@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"unicode/utf8"
 
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
@@ -26,9 +27,13 @@ func NewFeishuClient(client *lark.Client, appID, appSecret string) *FeishuClient
 	}
 }
 
+// makePostContent 构造飞书富文本 (post) 消息的 content JSON。
+// 飞书 API 限制: 富文本消息请求体最大 30 KB。
+// 此处限制文本内容为 20000 个字符（约 60KB UTF-8），确保 JSON 序列化后 < 30 KB。
 func makePostContent(text string) string {
-	if len(text) > 2000 {
-		text = text[:2000]
+	const maxRunes = 20000
+	if utf8.RuneCountInString(text) > maxRunes {
+		text = string([]rune(text)[:maxRunes])
 	}
 	content := map[string]interface{}{
 		"zh_cn": map[string]interface{}{
@@ -81,6 +86,45 @@ func (c *FeishuClient) ReplyToMessage(ctx context.Context, msgID, text string) e
 		return fmt.Errorf("reply: code=%d msg=%s", resp.Code, resp.Msg)
 	}
 	return nil
+}
+
+// GetMessageContent 通过 message_id 获取指定消息的文本内容。
+// 飞书 API: GET /open-apis/im/v1/messages/:message_id
+func (c *FeishuClient) GetMessageContent(ctx context.Context, messageID string) (string, error) {
+	token, err := c.getTenantToken(ctx)
+	if err != nil {
+		return "", err
+	}
+	url := fmt.Sprintf("https://open.feishu.cn/open-apis/im/v1/messages/%s", messageID)
+	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("get message: %w", err)
+	}
+	defer resp.Body.Close()
+
+	raw, _ := io.ReadAll(resp.Body)
+	var result struct {
+		Code int `json:"code"`
+		Data struct {
+			Items []struct {
+				MsgType string `json:"msg_type"`
+				Body    struct {
+					Content string `json:"content"`
+				} `json:"body"`
+			} `json:"items"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(raw, &result); err != nil {
+		return "", fmt.Errorf("get message parse: %w", err)
+	}
+	if result.Code != 0 || len(result.Data.Items) == 0 {
+		return "", fmt.Errorf("get message: no items or code=%d", result.Code)
+	}
+	item := result.Data.Items[0]
+	return parseMessageContent(item.MsgType, item.Body.Content), nil
 }
 
 func (c *FeishuClient) DownloadImage(ctx context.Context, msgID, imageKey string) ([]byte, error) {

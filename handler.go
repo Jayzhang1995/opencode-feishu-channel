@@ -163,6 +163,17 @@ func (h *Handler) HandleEvent(ctx context.Context, event *larkim.P2MessageReceiv
 		}
 	}
 
+
+	// 引用回复: 获取被回复的消息内容作为上下文
+	if parentID := safeStr(msg.ParentId); parentID != "" {
+		parentText, err := h.feishu.GetMessageContent(ctx, parentID)
+		if err == nil && parentText != "" {
+			text = "> 引用的消息: " + parentText + "\n\n" + text
+
+			logf("  included quoted msg %s (%d chars)", parentID, len(parentText))
+		}
+	}
+
 	if text == "" && msgType != "image" {
 		return
 	}
